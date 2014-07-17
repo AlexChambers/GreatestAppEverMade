@@ -1,8 +1,8 @@
 package com.alex.ben.greatestappevermade;
 
 import android.content.Intent;
-import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBarActivity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -13,10 +13,6 @@ import android.widget.Button;
 
 
 public class MainActivity extends ActionBarActivity {
-
-    float[] projectedProfitGraphData = {1f, 4f, 9f, 16f, 25f, 36f, 49f, 64f, 81f, 100f};
-    String[] axisX = {"left", "right"};
-    String[] axisY = {"bottom", "top"};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,7 +35,7 @@ public class MainActivity extends ActionBarActivity {
 
     public void showUsSomethingMagic()
     {
-        Intent graphIntent = new Intent(MainActivity.this, GraphView.class);
+        Intent graphIntent = new Intent(MainActivity.this, GraphActivity.class);
         startActivity(graphIntent);
     }
 
