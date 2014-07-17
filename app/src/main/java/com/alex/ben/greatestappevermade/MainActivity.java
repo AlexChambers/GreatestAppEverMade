@@ -1,10 +1,5 @@
 package com.alex.ben.greatestappevermade;
 
-import com.jjoe64.graphview.GraphView;
-import com.jjoe64.graphview.GraphViewSeries;
-import com.jjoe64.graphview.LineGraphView;
-import com.jjoe64.graphview.GraphView.GraphViewData;
-
 import android.content.Intent;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
