@@ -1,19 +1,27 @@
 package com.alex.ben.greatestappevermade;
 
-import android.support.v7.app.ActionBarActivity;
-import android.support.v7.app.ActionBar;
+import com.jjoe64.graphview.GraphView;
+import com.jjoe64.graphview.GraphViewSeries;
+import com.jjoe64.graphview.LineGraphView;
+import com.jjoe64.graphview.GraphView.GraphViewData;
+
+import android.content.Intent;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.os.Build;
-
+import android.widget.Button;
 
 
 public class MainActivity extends ActionBarActivity {
+
+    float[] projectedProfitGraphData = {1f, 4f, 9f, 16f, 25f, 36f, 49f, 64f, 81f, 100f};
+    String[] axisX = {"left", "right"};
+    String[] axisY = {"bottom", "top"};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,6 +32,20 @@ public class MainActivity extends ActionBarActivity {
                     .add(R.id.container, new PlaceholderFragment())
                     .commit();
         }
+
+        Button generateGraphButton = (Button) findViewById(R.id.generateGraphButton);
+        generateGraphButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showUsSomethingMagic();
+            }
+        });
+    }
+
+    public void showUsSomethingMagic()
+    {
+        Intent graphIntent = new Intent(MainActivity.this, GraphView.class);
+        startActivity(graphIntent);
     }
 
 
