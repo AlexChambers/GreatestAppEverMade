@@ -25,7 +25,7 @@ public class GraphActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_graph);
-
+//a random comment
         // Generate random data values
         int[] dataPoints = new int[4];
         Random rand = new Random();
