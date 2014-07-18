@@ -22,6 +22,15 @@ The GreatestAppEverMade will require an Android OS device running version 2.2 (A
 Version History
 ---------------
 
+1.1.0 - Thursday 17 2014
+
++ Properly configured the GraphView library.
+
++ Randomly generates numbers on each button press
+
+
+
+
 1.0.0 - Tuesday 15 July 2014
 
 + Added the provided GraphView class which will generate the graphs used in this app (Assignment 1)

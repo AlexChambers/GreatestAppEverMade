@@ -11,7 +11,6 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.Toast;
 
 
 public class MainActivity extends ActionBarActivity {
@@ -65,8 +64,7 @@ public class MainActivity extends ActionBarActivity {
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup layout,
                 Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_main, layout, false);
-            return rootView;
+            return(inflater.inflate(R.layout.fragment_main, layout, false));
         }
     }
 }
