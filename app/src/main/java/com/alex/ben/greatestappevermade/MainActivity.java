@@ -1,5 +1,8 @@
 package com.alex.ben.greatestappevermade;
 
+import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
@@ -7,7 +10,10 @@ import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 
 //for some reason could not resolve jjoe64 in Android studio, worked in Eclipse
 import com.jjoe64.graphview.GraphView;
@@ -19,6 +25,7 @@ import java.util.Random;
 
 public class MainActivity extends ActionBarActivity {
 
+    SQLiteDatabase db;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -86,6 +93,45 @@ public class MainActivity extends ActionBarActivity {
         });
 
 
+        final EditText patientname = (EditText) findViewById (R.id.name);
+        final EditText patientage = (EditText) findViewById (R.id.age);
+        final EditText patientid = (EditText) findViewById (R.id.ID);
+
+        final RadioGroup genders = (RadioGroup) findViewById (R.id.genders);
+        genders.setOnClickListener(new OnClickListener(){
+
+            @Override
+            public void onClick(View arg0) {
+                int selected = genders.getCheckedRadioButtonId();
+                String NAME = getTableName(patientname, patientid, patientage, selected);
+                try{
+                    db = openOrCreateDatabase (NAME, Context.MODE_PRIVATE, null);
+                } catch (SQLiteException e){
+
+                }
+                db.beginTransaction();
+                try{
+                    db.execSQL("create table " + NAME + " ( recID integer PRIMARY KEY autoincrement, time text, x text, y text, z text );");
+                    db.setTransactionSuccessful();
+                } catch (SQLiteException e){
+
+                } finally {
+                    db.endTransaction();
+                }
+            }
+
+        });
+
+    }
+    public String getTableName(EditText name, EditText id, EditText age, int selected){
+        String sex;
+        if (selected == R.id.female){
+            sex = "Female";
+        } else {
+            sex = "Male";
+        }
+        String tblname = name.getText().toString() + "_" + id.getText().toString() + "_" + age.getText().toString() + "_" + sex;
+        return tblname;
     }
 
 }
