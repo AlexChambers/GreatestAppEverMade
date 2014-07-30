@@ -1,10 +1,25 @@
 package com.alex.ben.greatestappevermade;
 
+// GraphView class provided by jjoe64
+// Source: https://github.com/jjoe64/GraphView
+import com.jjoe64.graphview.GraphView;
+import com.jjoe64.graphview.GraphView.GraphViewData;
+import com.jjoe64.graphview.GraphViewSeries;
+import com.jjoe64.graphview.LineGraphView;
+
+// Standard Library Imports
+import android.app.Service;
 import android.content.Context;
+import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.graphics.Color;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.v7.app.ActionBarActivity;
 import android.util.DisplayMetrics;
 import android.view.View;
@@ -13,15 +28,9 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RadioGroup;
-
-// GraphView class provided by jjoe64
-// Source: https://github.com/jjoe64/GraphView
-import com.jjoe64.graphview.GraphView;
-import com.jjoe64.graphview.GraphView.GraphViewData;
-import com.jjoe64.graphview.GraphViewSeries;
-import com.jjoe64.graphview.LineGraphView;
-
+import android.widget.Toast;
 import java.util.Random;
+
 
 public class MainActivity extends ActionBarActivity {
 
@@ -37,7 +46,7 @@ public class MainActivity extends ActionBarActivity {
                     .commit();
         }
 
-        // Create the graph
+        // Create the graph (color, values)
         final GraphViewSeries dataSeries = new GraphViewSeries( new GraphViewData[] { new GraphViewData(1, 0)}); //Initializes a graph with no data
         final GraphView graphView = new LineGraphView(this, "Assignment 1");
         graphView.setManualYAxisBounds(1, 0);  //Sets Y-axis bounds, ensures that blank graph doesn't look odd
@@ -57,7 +66,6 @@ public class MainActivity extends ActionBarActivity {
         LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) graphView.getLayoutParams();
         params.height = (int) (.7 * height);
         graphView.setLayoutParams(params);
-
         final LinearLayout layout = (LinearLayout) findViewById(R.id.layout);
         layout.addView(graphView);
 
@@ -90,6 +98,7 @@ public class MainActivity extends ActionBarActivity {
             }
         });
 
+        // User info fields
         final EditText patientname = (EditText) findViewById (R.id.name);
         final EditText patientage = (EditText) findViewById (R.id.age);
         final EditText patientid = (EditText) findViewById (R.id.ID);
@@ -102,20 +111,28 @@ public class MainActivity extends ActionBarActivity {
                 int selected = genders.getCheckedRadioButtonId();
                 String NAME = getTableName(patientname, patientid, patientage, selected);
 
-                try{
-                    db = openOrCreateDatabase (NAME, Context.MODE_PRIVATE, null);
-                } catch (SQLiteException e){
+                // Do nothing if a field is empty
+                if( patientage.toString().equals("") ||
+                    patientid.toString().equals("") ||
+                    patientname.toString().equals("") )
+                { Toast.makeText(getApplicationContext(), "Please fill out all fields", Toast.LENGTH_SHORT).show(); }
+                else
+                {
+                    try {
+                        db = openOrCreateDatabase(NAME, Context.MODE_PRIVATE, null);
+                    } catch (SQLiteException e) {
+                        Toast.makeText(getApplicationContext(), "Could not open/create database", Toast.LENGTH_SHORT).show();
+                    }
+                    db.beginTransaction();
 
-                }
-                db.beginTransaction();
-
-                try{
-                    db.execSQL("create table " + NAME + " ( recID integer PRIMARY KEY autoincrement, time text, x text, y text, z text );");
-                    db.setTransactionSuccessful();
-                } catch (SQLiteException e){
-
-                } finally {
-                    db.endTransaction();
+                    try {
+                        db.execSQL("create table " + NAME + " ( recID integer PRIMARY KEY autoincrement, time text, x text, y text, z text );");
+                        db.setTransactionSuccessful();
+                    } catch (SQLiteException e) {
+                        Toast.makeText(getApplicationContext(), "Could not query database", Toast.LENGTH_SHORT).show();
+                    } finally {
+                        db.endTransaction();
+                    }
                 }
             }
         });
@@ -129,5 +146,38 @@ public class MainActivity extends ActionBarActivity {
         }
         // Return the table name
         return (name.getText().toString() + "_" + id.getText().toString() + "_" + age.getText().toString() + "_" + sex);
+    }
+
+    // Accelerometer Class!
+    private class accelerometerPollingService extends Service implements SensorEventListener  {
+
+        SensorManager accelManager;
+        Sensor accelerometer;
+        float accelX;
+        float accelY;
+        float accelZ;
+
+        public void onSensorChanged(SensorEvent sensorEvent)
+        {
+            // Only want accelerometer events
+            Sensor sensor = sensorEvent.sensor;
+            if(sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+                accelX = sensorEvent.values[0];
+                accelY = sensorEvent.values[1];
+                accelZ = sensorEvent.values[2];
+
+                accelManager.unregisterListener(this);
+            }
+        }
+
+        @Override
+        public void onAccuracyChanged(Sensor sensor, int accuracy) {
+            //
+        }
+
+        @Override
+        public IBinder onBind(Intent intent) {
+            return null;
+        }
     }
 }
