@@ -161,6 +161,9 @@ public class MainActivity extends ActionBarActivity {
             public void onCheckedChanged(RadioGroup arg0, int arg1) {
                 int selected = genders.getCheckedRadioButtonId();
                 String NAME = getTableName(patientname, patientid, patientage, selected);
+                Intent accelIntent = new Intent();
+                accelIntent.putExtra("TABLE_NAME", NAME);
+                accelIntent.setAction("com.alex.ben.greatestappevermade.AccelerometerPollingService");
 
                 // Do nothing if any field is empty
                 if (patientage.getText().toString().equals("") || patientid.getText().toString().equals("") || patientname.getText().toString().equals("")) {
@@ -175,15 +178,15 @@ public class MainActivity extends ActionBarActivity {
                         db.execSQL("create table " + NAME + " ( recID integer PRIMARY KEY autoincrement, time text, x text, y text, z text );");
                         db.setTransactionSuccessful();
                         Toast.makeText(getApplicationContext(), "Table Created!\n(" + NAME + ")", Toast.LENGTH_SHORT).show();
+                        startService(accelIntent);
+                        Toast.makeText(getApplicationContext(), "Accelerometer Service Started!", Toast.LENGTH_SHORT).show();
                     } catch (SQLiteException sqlError) {
                         Toast.makeText(getApplicationContext(), "Table \"" + NAME + "\" already exists.", Toast.LENGTH_SHORT).show();
                     } finally {
                         db.endTransaction();
                     }
-                    Intent accelIntent = new Intent();
-                    accelIntent.putExtra("TABLE_NAME", NAME);
-                    accelIntent.setAction("com.alex.ben.greatestappevermade.AccelerometerPollingService");
-                    startService(accelIntent);
+
+
                 }
             }
 

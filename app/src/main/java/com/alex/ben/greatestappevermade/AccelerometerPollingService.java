@@ -10,7 +10,6 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.IBinder;
-import android.widget.Toast;
 
 // Accelerometer Class!
 public class AccelerometerPollingService extends Service implements SensorEventListener {
@@ -42,7 +41,7 @@ public class AccelerometerPollingService extends Service implements SensorEventL
                 db.execSQL("insert into " + NAME + "(time, x, y, z) values (" + accelX + ", " + accelY + ", " + accelZ + ");");
                 db.setTransactionSuccessful();
             } catch (SQLiteException e) {
-                Toast.makeText(getApplicationContext(), "Could not insert row", Toast.LENGTH_LONG).show();
+                // Could not insert row
             } finally {
                 db.endTransaction();
             }
@@ -52,9 +51,9 @@ public class AccelerometerPollingService extends Service implements SensorEventL
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {}
 
+
     @Override
     public void onCreate() {
-        Toast.makeText(this, "Accelerometer is Active!", Toast.LENGTH_LONG).show();
         accelManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         accelerometer = accelManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         accelManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
