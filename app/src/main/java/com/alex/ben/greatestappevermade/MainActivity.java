@@ -63,7 +63,7 @@ public class MainActivity extends ActionBarActivity {
         getWindowManager().getDefaultDisplay().getMetrics(metrics);
         int height = metrics.heightPixels;
 
-        // Makes the graph only take up 70% of the screen
+        // Makes the graph only take up 60% of the screen
         LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) graphView.getLayoutParams();
         params.height = (int) (.6 * height);
         graphView.setLayoutParams(params);
@@ -162,9 +162,7 @@ public class MainActivity extends ActionBarActivity {
                 String NAME = getTableName(patientname, patientid, patientage, selected);
 
                 // Do nothing if any field is empty
-                if (patientage.toString().equals("") ||
-                        patientid.toString().equals("") ||
-                        patientname.toString().equals("")) {
+                if (patientage.getText().toString().equals("") || patientid.getText().toString().equals("") || patientname.getText().toString().equals("")) {
                     Toast.makeText(getApplicationContext(), "Please fill out all fields", Toast.LENGTH_SHORT).show();
                 } else {
 
