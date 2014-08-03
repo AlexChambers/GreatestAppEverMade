@@ -22,27 +22,25 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RadioGroup;
+import android.widget.RadioGroup.OnCheckedChangeListener;
 import android.widget.Toast;
-import java.util.Random;
+
 
 
 public class MainActivity extends ActionBarActivity {
+
 
     // Database
     SQLiteDatabase db;
 
     // Passing this as a Bundle to AccelerometerPollingService class
-    Bundle data;
-    String tableName;
+    //Bundle data;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.fragment_main);
-        if (savedInstanceState == null) {
-            getSupportFragmentManager().beginTransaction()
-                    .commit();
-        }
 
         // Create the graph. Set colors and values.
         final GraphViewSeries dataSeriesX = new GraphViewSeries( new GraphViewData[] { new GraphViewData(1, 0)});
@@ -67,7 +65,7 @@ public class MainActivity extends ActionBarActivity {
 
         // Makes the graph only take up 70% of the screen
         LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) graphView.getLayoutParams();
-        params.height = (int) (.7 * height);
+        params.height = (int) (.6 * height);
         graphView.setLayoutParams(params);
         final LinearLayout layout = (LinearLayout) findViewById(R.id.layout);
         layout.addView(graphView);
@@ -78,7 +76,7 @@ public class MainActivity extends ActionBarActivity {
 
             @Override
             public void onClick(View v) {
-                Random rand = new Random();
+				/*Random rand = new Random();
                 // generates graph using 10 most recent data entries from the database
                 float dataArrayX[] = new float[10];
                 float dataArrayY[] = new float[10];
@@ -129,7 +127,7 @@ public class MainActivity extends ActionBarActivity {
                 graphView.getGraphViewStyle().setNumHorizontalLabels(10);
                 graphView.addSeries(dataSeriesX);
                 graphView.addSeries(dataSeriesY);
-                graphView.addSeries(dataSeriesZ);
+                graphView.addSeries(dataSeriesZ);*/
             }
         });
 
@@ -156,10 +154,10 @@ public class MainActivity extends ActionBarActivity {
 
 
         final RadioGroup genders = (RadioGroup) findViewById(R.id.genders);
-        genders.setOnClickListener(new OnClickListener() {
+        genders.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
             @Override
-            public void onClick(View arg0) {
+            public void onCheckedChanged(RadioGroup arg0, int arg1) {
                 int selected = genders.getCheckedRadioButtonId();
                 String NAME = getTableName(patientname, patientid, patientage, selected);
 
@@ -169,28 +167,27 @@ public class MainActivity extends ActionBarActivity {
                         patientname.toString().equals("")) {
                     Toast.makeText(getApplicationContext(), "Please fill out all fields", Toast.LENGTH_SHORT).show();
                 } else {
-                    // Open/Create the database
-                    try {
-                        db = openOrCreateDatabase(NAME, Context.MODE_PRIVATE, null);
-                    } catch (SQLiteException e) {
-                        Toast.makeText(getApplicationContext(), "Could not open/create database", Toast.LENGTH_LONG).show();
 
-                        // Create table in database
-                        db.beginTransaction();
-                        try {
-                            db.execSQL("create table " + NAME + " ( recID integer PRIMARY KEY autoincrement, time text, x text, y text, z text );");
-                            db.setTransactionSuccessful();
-                        } catch (SQLiteException sqlError) {
-                            Toast.makeText(getApplicationContext(), "Could not query database:\n" + NAME, Toast.LENGTH_SHORT).show();
-                        } finally {
-                            Intent accelIntent = new Intent();
-                            accelIntent.setAction("com.alex.ben.greatestappevermade.AccelerometerPollingService");
-                            startService(accelIntent);
-                            db.endTransaction();
-                        }
+                    db = openOrCreateDatabase(NAME, Context.MODE_PRIVATE, null);
+
+                    // Create table in database
+                    db.beginTransaction();
+                    try {
+                        db.execSQL("create table " + NAME + " ( recID integer PRIMARY KEY autoincrement, time text, x text, y text, z text );");
+                        db.setTransactionSuccessful();
+                        Toast.makeText(getApplicationContext(), "Table Created", Toast.LENGTH_LONG).show();
+                    } catch (SQLiteException sqlError) {
+                        Toast.makeText(getApplicationContext(), "Could not query database:\n" + NAME, Toast.LENGTH_SHORT).show();
+                    } finally {
+                        db.endTransaction();
                     }
-                } //End of Else
-            } //End of onClick
+                    Intent accelIntent = new Intent();
+                    accelIntent.putExtra("TABLE_NAME", NAME);
+                    accelIntent.setAction("com.alex.ben.greatestappevermade.AccelerometerPollingService");
+                    startService(accelIntent);
+                }
+            }
+
         });
     }
 
@@ -205,5 +202,3 @@ public class MainActivity extends ActionBarActivity {
         return (name.getText().toString() + "_" + id.getText().toString() + "_" + age.getText().toString() + "_" + sex);
     }
 }
-
-

@@ -23,4 +23,5 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.android.support:appcompat-v7:19.+'
     compile files('libs/GraphView-3.1.2.jar')
+    compile files('C:/Users/bkrak_000/git/GreatestAppEverMade/GraphView-3.1.2/GraphView-3.1.2.jar')
 }
