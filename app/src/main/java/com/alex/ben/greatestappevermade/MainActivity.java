@@ -25,6 +25,7 @@ import android.widget.RadioGroup;
 import android.widget.RadioGroup.OnCheckedChangeListener;
 import android.widget.Toast;
 
+import static android.database.sqlite.SQLiteDatabase.openDatabase;
 
 
 public class MainActivity extends ActionBarActivity {
@@ -166,16 +167,16 @@ public class MainActivity extends ActionBarActivity {
                     Toast.makeText(getApplicationContext(), "Please fill out all fields", Toast.LENGTH_SHORT).show();
                 } else {
 
-                    db = openOrCreateDatabase(NAME, Context.MODE_PRIVATE, null);
+                    db = openOrCreateDatabase(NAME, Context.MODE_PRIVATE, null); //SQLiteDatabase.CREATE_IF_NECESSARY
 
                     // Create table in database
                     db.beginTransaction();
                     try {
                         db.execSQL("create table " + NAME + " ( recID integer PRIMARY KEY autoincrement, time text, x text, y text, z text );");
                         db.setTransactionSuccessful();
-                        Toast.makeText(getApplicationContext(), "Table Created", Toast.LENGTH_LONG).show();
+                        Toast.makeText(getApplicationContext(), "Table Created!\n(" + NAME + ")", Toast.LENGTH_SHORT).show();
                     } catch (SQLiteException sqlError) {
-                        Toast.makeText(getApplicationContext(), "Could not query database:\n" + NAME, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), "Table \"" + NAME + "\" already exists.", Toast.LENGTH_SHORT).show();
                     } finally {
                         db.endTransaction();
                     }
