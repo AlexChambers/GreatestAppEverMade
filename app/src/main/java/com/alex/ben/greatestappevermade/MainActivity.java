@@ -35,7 +35,7 @@ public class MainActivity extends ActionBarActivity {
     SQLiteDatabase db;
 
     // Passing this as a Bundle to AccelerometerPollingService class
-    //Bundle data;
+    Bundle data;
 
 
     @Override
@@ -114,7 +114,7 @@ public class MainActivity extends ActionBarActivity {
                         new GraphViewData(3, rand.nextDouble()), new GraphViewData(4, rand.nextDouble()),
                         new GraphViewData(5, rand.nextDouble()), new GraphViewData(6, rand.nextDouble()),
                         new GraphViewData(7, rand.nextDouble()), new GraphViewData(8, rand.nextDouble()),
-                        new GraphViewData(9, rand.nextDouble()), new GraphViewData(10, rand.nextDouble())
+                        new GraphViewData(9, rand.nextDouble())
                 });
 
                 dataSeriesZ.resetData(new GraphViewData[] {
@@ -122,7 +122,7 @@ public class MainActivity extends ActionBarActivity {
                         new GraphViewData(3, rand.nextDouble()), new GraphViewData(4, rand.nextDouble()),
                         new GraphViewData(5, rand.nextDouble()), new GraphViewData(6, rand.nextDouble()),
                         new GraphViewData(7, rand.nextDouble()), new GraphViewData(8, rand.nextDouble()),
-                        new GraphViewData(9, rand.nextDouble()), new GraphViewData(10, rand.nextDouble())
+                        new GraphViewData(9, rand.nextDouble())
                 });
 
                 graphView.getGraphViewStyle().setNumHorizontalLabels(10);

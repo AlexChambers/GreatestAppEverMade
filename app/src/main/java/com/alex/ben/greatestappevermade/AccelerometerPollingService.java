@@ -11,7 +11,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.IBinder;
 
-// Accelerometer Class!
+// Accelerometer Class: Responds to accelerometer activity
 public class AccelerometerPollingService extends Service implements SensorEventListener {
 
     SensorManager accelManager;
