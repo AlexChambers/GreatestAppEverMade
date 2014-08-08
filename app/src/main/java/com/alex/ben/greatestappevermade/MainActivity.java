@@ -2,6 +2,9 @@ package com.alex.ben.greatestappevermade;
 
 // GraphView class provided by jjoe64
 // Source: https://github.com/jjoe64/GraphView
+import java.util.Timer;
+import java.util.TimerTask;
+
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.GraphView.GraphViewData;
 import com.jjoe64.graphview.GraphViewSeries;
@@ -10,10 +13,14 @@ import com.jjoe64.graphview.LineGraphView;
 // Standard Library Imports
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v7.app.ActionBarActivity;
 import android.util.DisplayMetrics;
 import android.view.View;
@@ -28,6 +35,7 @@ import android.widget.Toast;
 import static android.database.sqlite.SQLiteDatabase.openDatabase;
 
 
+
 public class MainActivity extends ActionBarActivity {
 
 
@@ -36,20 +44,38 @@ public class MainActivity extends ActionBarActivity {
 
     // Passing this as a Bundle to AccelerometerPollingService class
     Bundle data;
+    String NAME;
 
+
+    // Create the graph. Set colors and values.
+    GraphViewSeries dataSeriesX;
+    GraphViewSeries dataSeriesY;
+    GraphViewSeries dataSeriesZ;
+    GraphView graphView;
+
+    //Handler to obtain data from the AsynchTask
+    final Handler threadHandle = new Handler () {
+        @Override
+        public void handleMessage(Message msg){
+            double value = msg.getData().getDouble("value");
+            dataSeriesX.resetData (new GraphViewData []{new GraphViewData (1, 0), new GraphViewData (2, value)});
+            graphView.addSeries(dataSeriesX);
+            graphView.redrawAll();
+
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.fragment_main);
 
-        // Create the graph. Set colors and values.
-        final GraphViewSeries dataSeriesX = new GraphViewSeries( new GraphViewData[] { new GraphViewData(1, 0)});
-        final GraphViewSeries dataSeriesY = new GraphViewSeries( new GraphViewData[] { new GraphViewData(1, 0)});
-        final GraphViewSeries dataSeriesZ = new GraphViewSeries( new GraphViewData[] { new GraphViewData(1, 0)});
-        final GraphView graphView = new LineGraphView(this, "Assignment 2");
+        dataSeriesX = new GraphViewSeries( new GraphViewData[] { new GraphViewData(1, 0)});
+        dataSeriesY = new GraphViewSeries( new GraphViewData[] { new GraphViewData(1, 0)});
+        dataSeriesZ = new GraphViewSeries( new GraphViewData[] { new GraphViewData(1, 0)});
+        graphView = new LineGraphView(this, "Accelerometer Data");
 
-        graphView.setManualYAxisBounds(1, 0);  //Sets Y-axis bounds, ensures that blank graph doesn't look odd
+        //graphView.setManualYAxisBounds(1, 0);  //Sets Y-axis bounds, ensures that blank graph doesn't look odd
         graphView.getGraphViewStyle().setGridColor(Color.LTGRAY);
         graphView.getGraphViewStyle().setHorizontalLabelsColor(Color.RED);
         graphView.getGraphViewStyle().setVerticalLabelsColor(Color.BLUE);
@@ -58,6 +84,8 @@ public class MainActivity extends ActionBarActivity {
         graphView.addSeries(dataSeriesX);
         graphView.addSeries(dataSeriesY);
         graphView.addSeries(dataSeriesZ);
+
+
 
         // Finds the display screen height
         DisplayMetrics metrics = new DisplayMetrics();
@@ -71,64 +99,14 @@ public class MainActivity extends ActionBarActivity {
         final LinearLayout layout = (LinearLayout) findViewById(R.id.layout);
         layout.addView(graphView);
 
+
         // Generate the graph
         Button generateGraphButton = (Button) findViewById(R.id.startGraph);
         generateGraphButton.setOnClickListener(new OnClickListener() {
 
             @Override
             public void onClick(View v) {
-				/*Random rand = new Random();
-                // generates graph using 10 most recent data entries from the database
-                float dataArrayX[] = new float[10];
-                float dataArrayY[] = new float[10];
-                float dataArrayZ[] = new float[10];
-
-                // Initialize array values to 0
-                for(int looper = 10; looper > 0; looper--)
-                {
-                    dataArrayX[looper] = 0;
-                    dataArrayY[looper] = 0;
-                    dataArrayZ[looper] = 0;
-                }
-
-                // for loop counts backwards, just like our database table (start with last entry in table)
-                for(int looper = 10; looper > 0; looper--)
-                {
-                    // Get the data from database table
-                    // dataArrayX[looper] = ;
-                    // dataArrayY[looper] = ;
-                    // dataArrayZ[looper] = ;
-                }
-
-                // Set random data for three graphs
-                dataSeriesX.resetData(new GraphViewData[] {
-                        new GraphViewData(1, rand.nextDouble()), new GraphViewData(2, rand.nextDouble()),
-                        new GraphViewData(3, rand.nextDouble()), new GraphViewData(4, rand.nextDouble()),
-                        new GraphViewData(5, rand.nextDouble()), new GraphViewData(6, rand.nextDouble()),
-                        new GraphViewData(7, rand.nextDouble()), new GraphViewData(8, rand.nextDouble()),
-                        new GraphViewData(9, rand.nextDouble()), new GraphViewData(10, rand.nextDouble())
-                });
-
-                dataSeriesY.resetData(new GraphViewData[] {
-                        new GraphViewData(1, rand.nextDouble()), new GraphViewData(2, rand.nextDouble()),
-                        new GraphViewData(3, rand.nextDouble()), new GraphViewData(4, rand.nextDouble()),
-                        new GraphViewData(5, rand.nextDouble()), new GraphViewData(6, rand.nextDouble()),
-                        new GraphViewData(7, rand.nextDouble()), new GraphViewData(8, rand.nextDouble()),
-                        new GraphViewData(9, rand.nextDouble())
-                });
-
-                dataSeriesZ.resetData(new GraphViewData[] {
-                        new GraphViewData(1, rand.nextDouble()), new GraphViewData(2, rand.nextDouble()),
-                        new GraphViewData(3, rand.nextDouble()), new GraphViewData(4, rand.nextDouble()),
-                        new GraphViewData(5, rand.nextDouble()), new GraphViewData(6, rand.nextDouble()),
-                        new GraphViewData(7, rand.nextDouble()), new GraphViewData(8, rand.nextDouble()),
-                        new GraphViewData(9, rand.nextDouble())
-                });
-
-                graphView.getGraphViewStyle().setNumHorizontalLabels(10);
-                graphView.addSeries(dataSeriesX);
-                graphView.addSeries(dataSeriesY);
-                graphView.addSeries(dataSeriesZ);*/
+                new updateGraph().execute();
             }
         });
 
@@ -145,6 +123,7 @@ public class MainActivity extends ActionBarActivity {
                 graphView.addSeries(dataSeriesX);
                 graphView.addSeries(dataSeriesY);
                 graphView.addSeries(dataSeriesZ);
+
             }
         });
 
@@ -160,7 +139,7 @@ public class MainActivity extends ActionBarActivity {
             @Override
             public void onCheckedChanged(RadioGroup arg0, int arg1) {
                 int selected = genders.getCheckedRadioButtonId();
-                String NAME = getTableName(patientname, patientid, patientage, selected);
+                NAME = getTableName(patientname, patientid, patientage, selected);
                 Intent accelIntent = new Intent();
                 accelIntent.putExtra("TABLE_NAME", NAME);
                 accelIntent.setAction("com.alex.ben.greatestappevermade.AccelerometerPollingService");
@@ -175,6 +154,7 @@ public class MainActivity extends ActionBarActivity {
                     // Create table in database
                     db.beginTransaction();
                     try {
+                        db.execSQL("DROP TABLE IF EXISTS " + NAME + ";");
                         db.execSQL("create table " + NAME + " ( recID integer PRIMARY KEY autoincrement, time text, x text, y text, z text );");
                         db.setTransactionSuccessful();
                         Toast.makeText(getApplicationContext(), "Table Created!\n(" + NAME + ")", Toast.LENGTH_SHORT).show();
@@ -202,5 +182,32 @@ public class MainActivity extends ActionBarActivity {
             sex = "Male";
         }
         return (name.getText().toString() + "_" + id.getText().toString() + "_" + age.getText().toString() + "_" + sex);
+    }
+
+    //Thread to continuously check the table and update the UI
+    private class updateGraph extends AsyncTask<String, Long, Void>{
+        @Override
+        protected void onPreExecute(){
+            Toast.makeText(MainActivity.this, "Thread Starting", Toast.LENGTH_LONG).show();
+        }
+
+        @Override
+        protected Void doInBackground(String... arg0) {
+            for (int i = 0; i < 1000000; i++){
+                try {
+                    Thread.sleep(1000);
+                    Bundle b = new Bundle (1);
+                    b.putDouble("value",(double) i);
+                    Message msg = threadHandle.obtainMessage();
+                    msg.setData(b);
+                    threadHandle.sendMessage(msg);
+
+                } catch (InterruptedException e){
+                    e.printStackTrace();
+                }
+            }
+            return null;
+        }
+
     }
 }
