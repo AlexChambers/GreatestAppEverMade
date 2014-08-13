@@ -38,7 +38,7 @@ public class AccelerometerPollingService extends Service implements SensorEventL
     public void onSensorChanged(SensorEvent sensorEvent) {
         // Record accelerometer event data
         Sensor sensor = sensorEvent.sensor;
-        if (sensor.getType() == Sensor.TYPE_ACCELEROMETER && (System.currentTimeMillis() - time > 1000)) {
+        if ((sensor.getType() == Sensor.TYPE_ACCELEROMETER) && ((System.currentTimeMillis() - time) > 1000)) {
             time = System.currentTimeMillis();
             accelX = sensorEvent.values[0];
             accelY = sensorEvent.values[1];

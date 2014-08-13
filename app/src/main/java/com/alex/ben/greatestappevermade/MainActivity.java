@@ -251,13 +251,14 @@ public class MainActivity extends ActionBarActivity {
 		}
 
         @Override
-        public void onPostExecute(Void result){
-            //Toast.makeText(MainActivity.this, "Ending Thread\n(Updating Graph)", Toast.LENGTH_SHORT).show();
+        public void onPostExecute(Void result) {
+            Toast.makeText(MainActivity.this, "Ending Thread\n(Updating Graph)", Toast.LENGTH_SHORT).show();
         }
     }
 
-    private double[] getDataSQL(SQLiteDatabase db, int column, int position, int length, Cursor c) {
+    private double[] getDataSQL(SQLiteDatabase dbase, int column, int position, int length, Cursor c) {
         double [] data = new double [length];
+        dbase.beginTransaction();
         if (c.moveToPosition(position)) {
             for (int k = 0; k < length; k++)
             {
@@ -265,7 +266,7 @@ public class MainActivity extends ActionBarActivity {
                 boolean bool = c.moveToNext();
             }
         }
+        dbase.endTransaction();;
         return data;
     }
-
 }
