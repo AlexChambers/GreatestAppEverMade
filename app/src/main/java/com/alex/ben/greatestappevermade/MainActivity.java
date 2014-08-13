@@ -196,11 +196,11 @@ public class MainActivity extends ActionBarActivity {
     }
 
     //Thread to continuously check the table and update the UI
-    private class updateGraph extends AsyncTask<String, Long, Void>{
+    private class updateGraph extends AsyncTask<String, Void, Void>{
 
     	@Override
     	protected void onPreExecute(){
-    		Toast.makeText(MainActivity.this, "Thread Starting", Toast.LENGTH_LONG).show();
+    		Toast.makeText(MainActivity.this, "Starting Thread\n(Updating Graph)", Toast.LENGTH_LONG).show();
     	}
 
 		@Override
@@ -217,22 +217,22 @@ public class MainActivity extends ActionBarActivity {
 					int ycol = c.getColumnIndex("y");
 					int zcol = c.getColumnIndex("z");
 					//Checks how much data there is, returns last 10 or all the current data
-					if (n > 10){
+					if (n >= 10){
 						time = new int [10];
 						for (int k = 0; k < 10; k++){
 							time [k] = k + 1;
 						}
-						x = getData (db, xcol, n - 10, 10, c);
-						y = getData (db, ycol, n - 10, 10, c);
-						z = getData (db, zcol, n - 10, 10, c);
+						x = getDataSQL(db, xcol, n - 10, 10, c);
+						y = getDataSQL(db, ycol, n - 10, 10, c);
+						z = getDataSQL(db, zcol, n - 10, 10, c);
 					} else{
 						time = new int [n];
 						for (int k = 0; k < n; k++){
 							time [k] = k + 1;
 						}
-						x = getData (db, xcol, 0, n, c);
-						y = getData (db, ycol, 0, n, c);
-						z = getData (db, zcol, 0, n, c);
+						x = getDataSQL(db, xcol, 0, n, c);
+						y = getDataSQL(db, ycol, 0, n, c);
+						z = getDataSQL(db, zcol, 0, n, c);
 					}
 					Bundle b = new Bundle (1);
 					b.putIntArray("time", time);
@@ -250,8 +250,12 @@ public class MainActivity extends ActionBarActivity {
 			return null;
 		}
 
+        @Override
+        public void onPostExecute(Void result){
+            Toast.makeText(MainActivity.this, "Ending Thread\n(Updating Graph)", Toast.LENGTH_LONG).show();
+        }
 
-		private double[] getData(SQLiteDatabase db, int column, int position, int length, Cursor c) {
+		private double[] getDataSQL(SQLiteDatabase db, int column, int position, int length, Cursor c) {
 			double [] data = new double [length];
 			if (c.moveToPosition(position)) {
 				for (int k = 0; k < length; k++)
