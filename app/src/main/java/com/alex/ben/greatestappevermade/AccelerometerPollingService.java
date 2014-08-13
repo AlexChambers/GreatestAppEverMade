@@ -26,6 +26,15 @@ public class AccelerometerPollingService extends Service implements SensorEventL
 
     public AccelerometerPollingService(){}
 
+    @Override
+    public void onCreate() {
+        accelManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        accelerometer = accelManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        accelManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+
+        time = System.currentTimeMillis();
+    }
+
     public void onSensorChanged(SensorEvent sensorEvent) {
         // Record accelerometer event data
         Sensor sensor = sensorEvent.sensor;
@@ -50,18 +59,6 @@ public class AccelerometerPollingService extends Service implements SensorEventL
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {}
-
-
-    @Override
-    public void onCreate() {
-        accelManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-        accelerometer = accelManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        accelManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
-
-        time = System.currentTimeMillis();
-
-
-    }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {

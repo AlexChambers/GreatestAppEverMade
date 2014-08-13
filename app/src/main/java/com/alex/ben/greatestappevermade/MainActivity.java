@@ -2,14 +2,11 @@ package com.alex.ben.greatestappevermade;
 
 // GraphView class provided by jjoe64
 // Source: https://github.com/jjoe64/GraphView
-import com.alex.ben.greatestappevermade.R;
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.GraphView.GraphViewData;
-import com.jjoe64.graphview.GraphViewDataInterface;
 import com.jjoe64.graphview.GraphViewSeries;
 import com.jjoe64.graphview.LineGraphView;
-
-import java.util.Timer;
+//import com.jjoe64.graphview.GraphViewDataInterface;
 
 // Standard Library Imports
 import android.content.Context;
@@ -43,7 +40,6 @@ public class MainActivity extends ActionBarActivity {
     // Passing this as a Bundle to AccelerometerPollingService class
     Bundle data;
     String NAME;
- 
     
 	// Create the graph. Set colors and values.
     GraphViewSeries dataSeriesX;
@@ -53,6 +49,7 @@ public class MainActivity extends ActionBarActivity {
 
     //Handler to obtain data from the AsyncTask
     final Handler threadHandle = new Handler () {
+
     	@Override
     	public void handleMessage(Message msg){
     		double [] x = msg.getData().getDoubleArray("xvalue");
@@ -67,7 +64,6 @@ public class MainActivity extends ActionBarActivity {
     		graphView.addSeries(dataSeriesY);
     		graphView.addSeries(dataSeriesZ);
     		graphView.redrawAll();
-    		
     	}
 
 		private GraphViewData[] makeNewData(double[] x, int[] time) {
@@ -78,17 +74,18 @@ public class MainActivity extends ActionBarActivity {
 			return data;
 		}
     };
-    
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.fragment_main);
-        
+
         dataSeriesX = new GraphViewSeries( new GraphViewData[] { new GraphViewData(1, 0)});
         dataSeriesY = new GraphViewSeries( new GraphViewData[] { new GraphViewData(1, 0)});
         dataSeriesZ = new GraphViewSeries( new GraphViewData[] { new GraphViewData(1, 0)});
         graphView = new LineGraphView(this, "Accelerometer Data");
-        
+
         //graphView.setManualYAxisBounds(1, 0);  //Sets Y-axis bounds, ensures that blank graph doesn't look odd
         graphView.getGraphViewStyle().setGridColor(Color.LTGRAY);
         graphView.getGraphViewStyle().setHorizontalLabelsColor(Color.RED);
@@ -98,30 +95,32 @@ public class MainActivity extends ActionBarActivity {
         graphView.addSeries(dataSeriesX);
         graphView.addSeries(dataSeriesY);
         graphView.addSeries(dataSeriesZ);
-        
 
-
-        // Finds the display screen height
+        // Get height of display
         DisplayMetrics metrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(metrics);
         int height = metrics.heightPixels;
 
-        // Makes the graph only take up 60% of the screen
+        // Graph takes up 60% of phone screen
         LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) graphView.getLayoutParams();
-        params.height = (int) (.6 * height);
+        params.height = (int) (0.6 * height);
         graphView.setLayoutParams(params);
         final LinearLayout layout = (LinearLayout) findViewById(R.id.layout);
         layout.addView(graphView);
-        
 
-        
         // Generate the graph
         Button generateGraphButton = (Button) findViewById(R.id.startGraph);
         generateGraphButton.setOnClickListener(new OnClickListener() {
 
             @Override
             public void onClick(View v) {
-            	new updateGraph().execute();
+                if(     (((EditText) findViewById(R.id.ID)).getText().toString().length() == 0) ||
+                        (((EditText) findViewById(R.id.ID)).getText().toString().length() == 0) ||
+                        (((EditText) findViewById(R.id.ID)).getText().toString().length() == 0)) {
+                    Toast.makeText(getApplicationContext(), "Please fill out all fields", Toast.LENGTH_SHORT).show();
+                } else {
+                    new updateGraph().execute();
+                }
             }
         });
 
@@ -139,7 +138,6 @@ public class MainActivity extends ActionBarActivity {
                 graphView.addSeries(dataSeriesY);
                 graphView.addSeries(dataSeriesZ);
                 graphView.redrawAll();
-                
             }
         });
 
@@ -152,40 +150,37 @@ public class MainActivity extends ActionBarActivity {
         final RadioGroup genders = (RadioGroup) findViewById(R.id.genders);
         genders.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
-            @Override
-            public void onCheckedChanged(RadioGroup arg0, int arg1) {
-                int selected = genders.getCheckedRadioButtonId();
-                NAME = getTableName(patientname, patientid, patientage, selected);
-                Intent accelIntent = new Intent();
-                accelIntent.putExtra("TABLE_NAME", NAME);
-                accelIntent.setAction("com.alex.ben.greatestappevermade.AccelerometerPollingService");
+                @Override
+                public void onCheckedChanged(RadioGroup arg0, int arg1) {
+                    int selected = genders.getCheckedRadioButtonId();
+                    NAME = getTableName(patientname, patientid, patientage, selected);
+                    Intent accelIntent = new Intent();
+                    accelIntent.putExtra("TABLE_NAME", NAME);
+                    accelIntent.setAction("com.alex.ben.greatestappevermade.AccelerometerPollingService");
 
-                // Do nothing if any field is empty
-                if (patientage.getText().toString().equals("") || patientid.getText().toString().equals("") || patientname.getText().toString().equals("")) {
-                    Toast.makeText(getApplicationContext(), "Please fill out all fields", Toast.LENGTH_SHORT).show();
-                } else {
+                    // Do nothing if any field is empty
+                    if ((patientage.getText().toString().length() == 0) || (patientid.getText().toString().length() == 0) || (patientname.getText().toString().length() == 0)) {
+                        Toast.makeText(getApplicationContext(), "Please fill out all fields", Toast.LENGTH_SHORT).show();
+                    } else {
 
-                    db = openOrCreateDatabase(NAME, Context.MODE_PRIVATE, null); //SQLiteDatabase.CREATE_IF_NECESSARY
+                        db = openOrCreateDatabase(NAME, Context.MODE_PRIVATE, null); //SQLiteDatabase.CREATE_IF_NECESSARY
 
-                    // Create table in database
-                    db.beginTransaction();
-                    try {
-                    	db.execSQL("DROP TABLE IF EXISTS " + NAME + ";");
-                        db.execSQL("create table " + NAME + " (time text, x text, y text, z text );");
-                        db.setTransactionSuccessful();
-                        Toast.makeText(getApplicationContext(), "Table Created!\n(" + NAME + ")", Toast.LENGTH_SHORT).show();
-                        startService(accelIntent);
-                        Toast.makeText(getApplicationContext(), "Accelerometer Service Started!", Toast.LENGTH_SHORT).show();
-                    } catch (SQLiteException sqlError) {
-                        Toast.makeText(getApplicationContext(), "Table \"" + NAME + "\" already exists.", Toast.LENGTH_SHORT).show();
-                    } finally {
-                        db.endTransaction();
+                        // Create table in database
+                        db.beginTransaction();
+                        try {
+                            db.execSQL("DROP TABLE IF EXISTS " + NAME + ";");
+                            db.execSQL("create table " + NAME + " (time text, x text, y text, z text );");
+                            db.setTransactionSuccessful();
+                            Toast.makeText(getApplicationContext(), "Table Created!\n(" + NAME + ")", Toast.LENGTH_SHORT).show();
+                            startService(accelIntent);
+                            Toast.makeText(getApplicationContext(), "Accelerometer Service Started!", Toast.LENGTH_SHORT).show();
+                        } catch (SQLiteException sqlError) {
+                            Toast.makeText(getApplicationContext(), "Table \"" + NAME + "\" already exists.", Toast.LENGTH_SHORT).show();
+                        } finally {
+                            db.endTransaction();
+                        }
                     }
-
-
                 }
-            }
-
         });
     }
 
@@ -202,6 +197,7 @@ public class MainActivity extends ActionBarActivity {
 
     //Thread to continuously check the table and update the UI
     private class updateGraph extends AsyncTask<String, Long, Void>{
+
     	@Override
     	protected void onPreExecute(){
     		Toast.makeText(MainActivity.this, "Thread Starting", Toast.LENGTH_LONG).show();
@@ -246,7 +242,7 @@ public class MainActivity extends ActionBarActivity {
 					Message msg = threadHandle.obtainMessage();
 					msg.setData(b);
 					threadHandle.sendMessage(msg);
-					
+
 				//} catch (InterruptedException e){
 				//	e.printStackTrace();
 				//}
@@ -266,6 +262,6 @@ public class MainActivity extends ActionBarActivity {
 			}
 			return data;
 		}
-    	
+
     }
 }
