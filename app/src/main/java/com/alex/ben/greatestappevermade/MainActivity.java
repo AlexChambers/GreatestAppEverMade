@@ -197,10 +197,9 @@ public class MainActivity extends ActionBarActivity {
 
     //Thread to continuously check the table and update the UI
     private class updateGraph extends AsyncTask<String, Void, Void>{
-
     	@Override
     	protected void onPreExecute(){
-    		Toast.makeText(MainActivity.this, "Starting Thread\n(Updating Graph)", Toast.LENGTH_LONG).show();
+    		Toast.makeText(MainActivity.this, "Starting Thread\n(Updating Graph)", Toast.LENGTH_SHORT).show();
     	}
 
 		@Override
@@ -216,15 +215,16 @@ public class MainActivity extends ActionBarActivity {
 					int xcol = c.getColumnIndex("x");
 					int ycol = c.getColumnIndex("y");
 					int zcol = c.getColumnIndex("z");
+
 					//Checks how much data there is, returns last 10 or all the current data
-					if (n >= 10){
-						time = new int [10];
-						for (int k = 0; k < 10; k++){
-							time [k] = k + 1;
-						}
-						x = getDataSQL(db, xcol, n - 10, 10, c);
-						y = getDataSQL(db, ycol, n - 10, 10, c);
-						z = getDataSQL(db, zcol, n - 10, 10, c);
+                    if (n >= 10){
+                        time = new int [10];
+                        for (int k = 0; k < 10; k++){
+                        time [k] = k + 1;
+                    }
+                    x = getDataSQL(db, xcol, n - 10, 10, c);
+                    y = getDataSQL(db, ycol, n - 10, 10, c);
+                    z = getDataSQL(db, zcol, n - 10, 10, c);
 					} else{
 						time = new int [n];
 						for (int k = 0; k < n; k++){
@@ -252,20 +252,20 @@ public class MainActivity extends ActionBarActivity {
 
         @Override
         public void onPostExecute(Void result){
-            Toast.makeText(MainActivity.this, "Ending Thread\n(Updating Graph)", Toast.LENGTH_LONG).show();
+            //Toast.makeText(MainActivity.this, "Ending Thread\n(Updating Graph)", Toast.LENGTH_SHORT).show();
         }
-
-		private double[] getDataSQL(SQLiteDatabase db, int column, int position, int length, Cursor c) {
-			double [] data = new double [length];
-			if (c.moveToPosition(position)) {
-				for (int k = 0; k < length; k++)
-				{
-					data [k] = c.getDouble(column);
-					boolean bool = c.moveToNext();
-				}
-			}
-			return data;
-		}
-
     }
+
+    private double[] getDataSQL(SQLiteDatabase db, int column, int position, int length, Cursor c) {
+        double [] data = new double [length];
+        if (c.moveToPosition(position)) {
+            for (int k = 0; k < length; k++)
+            {
+                data [k] = c.getDouble(column);
+                boolean bool = c.moveToNext();
+            }
+        }
+        return data;
+    }
+
 }
