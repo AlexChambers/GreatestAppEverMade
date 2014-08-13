@@ -1,0 +1,28 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 20
+    buildToolsVersion "20.0.0"
+
+    defaultConfig {
+        applicationId "com.alex.ben.greatestappevermade"
+        minSdkVersion 8
+        targetSdkVersion 8
+        versionCode 1
+        versionName "1.0"
+    }
+    buildTypes {
+        release {
+            runProguard false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+dependencies {
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    compile 'com.android.support:appcompat-v7:19.+'
+    compile files('libs/GraphView-3.1.2.jar')
+    compile files('C:/Users/bkrak_000/git/GreatestAppEverMade/GraphView-3.1.2/GraphView-3.1.2.jar')
+    compile files('C:/Users/ac/SkyDrive/2014 Summer/CSE494/GitHub/GreatestAppEverMade/.idea/libraries/GraphView-3.1.2.jar')
+}

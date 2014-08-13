@@ -1,14 +1,14 @@
-package com.alex.ben.greatestappevermade;
+package com.example.testgraph;
 
 // GraphView class provided by jjoe64
 // Source: https://github.com/jjoe64/GraphView
-import java.util.Timer;
-import java.util.TimerTask;
-
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.GraphView.GraphViewData;
+import com.jjoe64.graphview.GraphViewDataInterface;
 import com.jjoe64.graphview.GraphViewSeries;
 import com.jjoe64.graphview.LineGraphView;
+
+import java.util.Timer;
 
 // Standard Library Imports
 import android.content.Context;
@@ -32,22 +32,19 @@ import android.widget.RadioGroup;
 import android.widget.RadioGroup.OnCheckedChangeListener;
 import android.widget.Toast;
 
-import static android.database.sqlite.SQLiteDatabase.openDatabase;
-
-
 
 public class MainActivity extends ActionBarActivity {
 
-
+	boolean run = true;
     // Database
     SQLiteDatabase db;
 
     // Passing this as a Bundle to AccelerometerPollingService class
     Bundle data;
     String NAME;
-
-
-    // Create the graph. Set colors and values.
+ 
+    
+	// Create the graph. Set colors and values.
     GraphViewSeries dataSeriesX;
     GraphViewSeries dataSeriesY;
     GraphViewSeries dataSeriesZ;
@@ -55,26 +52,42 @@ public class MainActivity extends ActionBarActivity {
 
     //Handler to obtain data from the AsynchTask
     final Handler threadHandle = new Handler () {
-        @Override
-        public void handleMessage(Message msg){
-            double value = msg.getData().getDouble("value");
-            dataSeriesX.resetData (new GraphViewData []{new GraphViewData (1, 0), new GraphViewData (2, value)});
-            graphView.addSeries(dataSeriesX);
-            graphView.redrawAll();
+    	@Override
+    	public void handleMessage(Message msg){
+    		double [] x = msg.getData().getDoubleArray("xvalue");
+    		double [] y = msg.getData().getDoubleArray("yvalue");
+    		double [] z = msg.getData().getDoubleArray("zvalue");
+    		int [] time = msg.getData().getIntArray("time");
+    		
+    		dataSeriesX.resetData(makeNewData(x, time));
+    		dataSeriesY.resetData(makeNewData (y, time));
+    		dataSeriesZ.resetData(makeNewData(z, time));
+    		graphView.addSeries(dataSeriesX);
+    		graphView.addSeries(dataSeriesY);
+    		graphView.addSeries(dataSeriesZ);
+    		graphView.redrawAll();
+    		
+    	}
 
-        }
+		private GraphViewData[] makeNewData(double[] x, int[] time) {
+			GraphViewData [] data = new GraphViewData [time.length];
+			for (int i = 0; i < time.length; i++){
+				data [i] = new GraphViewData (time [i], x [i]);
+			}
+			return data;
+		}
     };
-
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.fragment_main);
-
+        setContentView(R.layout.activity_main);
+        
         dataSeriesX = new GraphViewSeries( new GraphViewData[] { new GraphViewData(1, 0)});
         dataSeriesY = new GraphViewSeries( new GraphViewData[] { new GraphViewData(1, 0)});
         dataSeriesZ = new GraphViewSeries( new GraphViewData[] { new GraphViewData(1, 0)});
         graphView = new LineGraphView(this, "Accelerometer Data");
-
+        
         //graphView.setManualYAxisBounds(1, 0);  //Sets Y-axis bounds, ensures that blank graph doesn't look odd
         graphView.getGraphViewStyle().setGridColor(Color.LTGRAY);
         graphView.getGraphViewStyle().setHorizontalLabelsColor(Color.RED);
@@ -84,7 +97,7 @@ public class MainActivity extends ActionBarActivity {
         graphView.addSeries(dataSeriesX);
         graphView.addSeries(dataSeriesY);
         graphView.addSeries(dataSeriesZ);
-
+        
 
 
         // Finds the display screen height
@@ -98,15 +111,16 @@ public class MainActivity extends ActionBarActivity {
         graphView.setLayoutParams(params);
         final LinearLayout layout = (LinearLayout) findViewById(R.id.layout);
         layout.addView(graphView);
+        
 
-
+        
         // Generate the graph
         Button generateGraphButton = (Button) findViewById(R.id.startGraph);
         generateGraphButton.setOnClickListener(new OnClickListener() {
 
             @Override
             public void onClick(View v) {
-                new updateGraph().execute();
+            	new updateGraph().execute();
             }
         });
 
@@ -123,7 +137,8 @@ public class MainActivity extends ActionBarActivity {
                 graphView.addSeries(dataSeriesX);
                 graphView.addSeries(dataSeriesY);
                 graphView.addSeries(dataSeriesZ);
-
+                graphView.redrawAll();
+                
             }
         });
 
@@ -154,8 +169,8 @@ public class MainActivity extends ActionBarActivity {
                     // Create table in database
                     db.beginTransaction();
                     try {
-                        db.execSQL("DROP TABLE IF EXISTS " + NAME + ";");
-                        db.execSQL("create table " + NAME + " ( recID integer PRIMARY KEY autoincrement, time text, x text, y text, z text );");
+                    	db.execSQL("DROP TABLE IF EXISTS " + NAME + ";");
+                        db.execSQL("create table " + NAME + " (time text, x text, y text, z text );");
                         db.setTransactionSuccessful();
                         Toast.makeText(getApplicationContext(), "Table Created!\n(" + NAME + ")", Toast.LENGTH_SHORT).show();
                         startService(accelIntent);
@@ -186,28 +201,70 @@ public class MainActivity extends ActionBarActivity {
 
     //Thread to continuously check the table and update the UI
     private class updateGraph extends AsyncTask<String, Long, Void>{
-        @Override
-        protected void onPreExecute(){
-            Toast.makeText(MainActivity.this, "Thread Starting", Toast.LENGTH_LONG).show();
-        }
+    	@Override
+    	protected void onPreExecute(){
+    		Toast.makeText(MainActivity.this, "Thread Starting", Toast.LENGTH_LONG).show();
+    	}
 
-        @Override
-        protected Void doInBackground(String... arg0) {
-            for (int i = 0; i < 1000000; i++){
-                try {
-                    Thread.sleep(1000);
-                    Bundle b = new Bundle (1);
-                    b.putDouble("value",(double) i);
-                    Message msg = threadHandle.obtainMessage();
-                    msg.setData(b);
-                    threadHandle.sendMessage(msg);
+		@Override
+		protected Void doInBackground(String... arg0) {
+			//while (run) {
+				double x [];
+				double y [];
+				double z [];
+				int time [];
+				//try {
+					Cursor c = db.rawQuery("SELECT * FROM " + NAME, null);
+					int n = c.getCount();
+					int xcol = c.getColumnIndex("x");
+					int ycol = c.getColumnIndex("y");
+					int zcol = c.getColumnIndex("z");
+					//Checks how much data there is, returns last 10 or all the current data
+					if (n < 10){
+						time = new int [10];
+						for (int k = 0; k < 10; k++){
+							time [k] = k + 1;
+						}
+						x = getData (db, xcol, n - 10, 10, c);
+						y = getData (db, ycol, n - 10, 10, c);
+						z = getData (db, zcol, n - 10, 10, c);
+					} else{
+						time = new int [n];
+						for (int k = 0; k < n; k++){
+							time [k] = k + 1;
+						}
+						x = getData (db, xcol, 0, n, c);
+						y = getData (db, ycol, 0, n, c);
+						z = getData (db, zcol, 0, n, c);
+					}
+					Bundle b = new Bundle (1);
+					b.putIntArray("time", time);
+					b.putDoubleArray("xvalue",x);
+					b.putDoubleArray("yvalue",y);
+					b.putDoubleArray("zvalue",z);
+					Message msg = threadHandle.obtainMessage();
+					msg.setData(b);
+					threadHandle.sendMessage(msg);
+					
+				//} catch (InterruptedException e){
+				//	e.printStackTrace();
+				//}
+			//}
+			return null;
+		}
 
-                } catch (InterruptedException e){
-                    e.printStackTrace();
-                }
-            }
-            return null;
-        }
 
+		private double[] getData(SQLiteDatabase db, int column, int position, int length, Cursor c) {
+			double [] data = new double [length];
+			if (c.moveToPosition(position)) {
+				for (int k = 0; k < length; k++)
+				{
+					data [k] = c.getDouble(column);
+					boolean bool = c.moveToNext();
+				}
+			}
+			return data;
+		}
+    	
     }
 }
