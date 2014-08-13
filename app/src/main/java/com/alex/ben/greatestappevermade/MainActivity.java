@@ -51,7 +51,7 @@ public class MainActivity extends ActionBarActivity {
     GraphViewSeries dataSeriesZ;
     GraphView graphView;
 
-    //Handler to obtain data from the AsynchTask
+    //Handler to obtain data from the AsyncTask
     final Handler threadHandle = new Handler () {
     	@Override
     	public void handleMessage(Message msg){
@@ -221,7 +221,7 @@ public class MainActivity extends ActionBarActivity {
 					int ycol = c.getColumnIndex("y");
 					int zcol = c.getColumnIndex("z");
 					//Checks how much data there is, returns last 10 or all the current data
-					if (n < 10){
+					if (n > 10){
 						time = new int [10];
 						for (int k = 0; k < 10; k++){
 							time [k] = k + 1;
