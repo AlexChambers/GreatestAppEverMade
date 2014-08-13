@@ -1,7 +1,8 @@
-package com.example.testgraph;
+package com.alex.ben.greatestappevermade;
 
 // GraphView class provided by jjoe64
 // Source: https://github.com/jjoe64/GraphView
+import com.alex.ben.greatestappevermade.R;
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.GraphView.GraphViewData;
 import com.jjoe64.graphview.GraphViewDataInterface;
@@ -81,7 +82,7 @@ public class MainActivity extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.fragment_main);
         
         dataSeriesX = new GraphViewSeries( new GraphViewData[] { new GraphViewData(1, 0)});
         dataSeriesY = new GraphViewSeries( new GraphViewData[] { new GraphViewData(1, 0)});
